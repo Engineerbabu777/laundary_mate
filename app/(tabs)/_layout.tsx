@@ -5,7 +5,9 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function Layout() {
   return (
-    <Tabs>
+    <Tabs screenOptions={{
+      headerShown:false
+    }}>
       <Tabs.Screen
         name="home"
         options={{
