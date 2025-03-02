@@ -11,10 +11,8 @@ import { Octicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 
 const index = () => {
-    const router = useRouter();
   return (
     <ScrollView>
       <View style={{ padding: 12, height: 200, backgroundColor: "#FEBE10" }}>
@@ -140,7 +138,7 @@ const index = () => {
       <View
         style={{
           marginTop: 90,
-          marginHorizontal: 10,
+          marginHorizontal: 5,
           flexDirection: "row",
           alignItems: "center",
           gap: 10,
@@ -237,7 +235,7 @@ const index = () => {
 
       <View
         style={{
-          marginHorizontal: 10,
+          marginHorizontal: 5,
           marginVertical: 10,
           flexDirection: "row",
           alignItems: "center",
@@ -296,6 +294,7 @@ const index = () => {
             flexDirection: "row",
             alignItems: "center",
             gap: 10,
+            flex:1
           }}
         >
           <View>
@@ -303,7 +302,7 @@ const index = () => {
               style={{
                 fontSize: 20,
                 color: "#FEBE10",
-                width: 100,
+                width: 130,
                 fontWeight: "bold",
               }}
             >
