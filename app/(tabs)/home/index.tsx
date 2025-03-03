@@ -11,6 +11,7 @@ import { Octicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 const index = () => {
   return (
@@ -117,7 +118,7 @@ const index = () => {
               }}
             >
               <Pressable
-              onPress={()=>{}}
+              onPress={()=>{router.push("/home/address")}}
                 style={{
                   backgroundColor: "#FEBE10",
                   paddingHorizontal: 10,

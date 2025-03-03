@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -12,27 +13,27 @@ import { Entypo } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import moment from "moment";
+import { useRouter } from "expo-router";
+import { addDoc, collection, getDoc, getDocs, query } from "firebase/firestore";
+import { auth, db } from "../../../firebase";
 
 const address = () => {
   const router = useRouter();
-
-  const [step, setStep] = useState<number>(1);
-  const [currentDate, setCurrentDate] = useState<Date | number | string | any>(
-    moment()
-  );
-  const [deliveryDate, setDeliveryDate] = useState<
-    Date | number | string | any
-  >(moment());
+  const dispatch: any = null;
+  const cart: any = [];
+  const total = 0;
+  const [step, setStep] = useState<any>(1);
+  const [currentDate, setCurrentDate] = useState<any>(moment());
+  const [deliveryDate, setDeliveryDate] = useState<any>(moment());
   const [selectedTime, setSelectedTime] = useState<any>(null);
   const [selectedDeliveryTime, setSelectedDeliveryTime] = useState<any>(null);
-  const [addresses, setAddresses] = useState<string[] | []>([]);
-  const [selectedDate, setSelectedDate] = useState<
-    Date | number | string | any
-  >(moment());
-  const [selectedAdress, setSelectedAdress] = useState<string | null>("");
+  const [addresses, setAddresses] = useState<any>([]);
+  const [selectedDate, setSelectedDate] = useState<any>(moment());
+  const [selectedAdress, setSelectedAdress] = useState<any>("");
   console.log("addresses", addresses);
+  const userUid = auth?.currentUser.uid;
+  console.log("userId", userUid);
   const handleBack = () => {
     setStep((prevStep) => (prevStep > 1 ? prevStep - 1 : prevStep));
   };
@@ -44,7 +45,28 @@ const address = () => {
   ];
 
   useEffect(() => {
-    const fetchAddress = async () => {};
+    const fetchAddress = async () => {
+      try {
+        const addressCollectionRef = collection(
+          db,
+          "users",
+          userUid,
+          "userAddresses"
+        );
+
+        const addressQuery = query(addressCollectionRef);
+
+        const querySnapshot = await getDocs(addressQuery);
+        const addresses = [];
+
+        querySnapshot.forEach((doc) => {
+          addresses.push({ id: doc.id, ...doc.data() });
+        });
+        setAddresses(addresses);
+      } catch (error) {
+        console.log("Error", error);
+      }
+    };
 
     fetchAddress();
   }, []);
@@ -64,7 +86,22 @@ const address = () => {
     });
   };
   console.log(step);
-  const placeOrder = async () => {};
+  const placeOrder = async () => {
+    dispatch(cleanCart());
+
+    router.replace("/(tabs)/orders");
+
+    const ordersCollectionRef = collection(db, "users", userUid, "orders");
+
+    const orderDocRef = await addDoc(ordersCollectionRef, {
+      items: { ...cart },
+      address: selectedAdress,
+      pickuptime: `${selectedTime.startTime} - ${selectedTime.endTime}`,
+      deliveryTime: `${selectedDeliveryTime.startTime} - ${selectedDeliveryTime.endTime}`
+    });
+
+    console.log("order placed successfully!", orderDocRef.id);
+  };
   const getNext6Days = () => {
     const nextDays = [];
     for (let i = 0; i < 5; i++) {
@@ -385,14 +422,14 @@ const address = () => {
                 style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
               >
                 <AntDesign name="plus" size={24} color="black" />
-                <Pressable onPress={() => {}}>
+                <Pressable onPress={() => router.push("/home/add")}>
                   <Text style={{ fontSize: 16 }}>Add address</Text>
                 </Pressable>
               </Pressable>
 
               <View>
                 {/* map over the addresses */}
-                {addresses?.map((item: any, index: number) => (
+                {addresses?.map((item, index) => (
                   <Pressable
                     onPress={() => setSelectedAdress(item)}
                     key={index}
@@ -609,6 +646,37 @@ const address = () => {
                 </Text>
               </View>
 
+              <View style={{ marginHorizontal: 12 }}>
+                {cart?.map((item, index) => (
+                  <Pressable
+                    style={{
+                      padding: 10,
+                      backgroundColor: "white",
+                      marginVertical: 13,
+                      flexDirection: "row",
+                      gap: 12,
+                      borderRadius: 5
+                    }}
+                    key={index}
+                  >
+                    <View>
+                      <Image
+                        style={{ width: 40, height: 40 }}
+                        source={{ uri: item?.item?.image }}
+                      />
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <Text>{item?.item.name}</Text>
+                      <Text>{item?.item.price * item?.item.quantity}</Text>
+                    </View>
+
+                    <Pressable>
+                      <AntDesign name="pluscircleo" size={24} color="#89CFF0" />
+                    </Pressable>
+                  </Pressable>
+                ))}
+              </View>
               <View
                 style={{
                   backgroundColor: "#0066b2",
@@ -629,7 +697,7 @@ const address = () => {
                     Total Amount
                   </Text>
                   <Text style={{ color: "white", fontWeight: "500" }}>
-                    Rs {"432"}
+                    Rs {total}
                   </Text>
                 </View>
 
@@ -677,7 +745,7 @@ const address = () => {
                     Total Payable
                   </Text>
                   <Text style={{ color: "white", fontWeight: "500" }}>
-                    Rs {"432" + 25}
+                    Rs {total + 25}
                   </Text>
                 </View>
               </View>
@@ -702,7 +770,7 @@ const address = () => {
                     TOTAL AMOUNT
                   </Text>
                   <Text style={{ color: "white", fontWeight: "500" }}>
-                    Rs {"432"}
+                    Rs {total}
                   </Text>
                 </View>
                 <View
@@ -741,6 +809,41 @@ const address = () => {
           )}
         </ScrollView>
       </View>
+
+      {cart.length > 0 && (
+        <Pressable style={{ backgroundColor: "#E0E0E0", padding: 10 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <View
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: 15,
+                backgroundColor: "white",
+                justifyContent: "center",
+                alignItems: "center"
+              }}
+            >
+              <Ionicons name="basket-outline" size={24} color="black" />
+            </View>
+
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 13, fontWeight: "500" }}>
+                Basket Total Rs {total}
+              </Text>
+              <Text style={{ fontSize: 13, fontWeight: "500", marginTop: 3 }}>
+                You have {cart.length} items saved in your basket
+              </Text>
+            </View>
+
+            <Pressable
+              onPress={() => router.push("/basket/cart")}
+              style={{ padding: 10, backgroundColor: "white", borderRadius: 4 }}
+            >
+              <Text>View</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      )}
 
       <View
         style={{
