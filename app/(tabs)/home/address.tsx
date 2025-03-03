@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Image
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -34,8 +33,6 @@ const address = () => {
   >(moment());
   const [selectedAdress, setSelectedAdress] = useState<string | null>("");
   console.log("addresses", addresses);
-  const userUid = "89238u9hi9ew";
-  console.log("userId", userUid);
   const handleBack = () => {
     setStep((prevStep) => (prevStep > 1 ? prevStep - 1 : prevStep));
   };
