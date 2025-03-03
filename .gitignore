@@ -37,6 +37,7 @@ yarn-error.*
 
 app-example
 
-.secrets
-secrets
-/secrets
+.secrets.ts 
+secrets.ts 
+/secrets.ts
+./secrets.ts 

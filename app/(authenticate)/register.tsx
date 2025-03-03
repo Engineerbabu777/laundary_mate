@@ -6,7 +6,8 @@ import {
   Pressable,
   Image,
   KeyboardAvoidingView,
-  TextInput
+  TextInput,
+  Alert
 } from "react-native";
 import React, { useState } from "react";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
@@ -52,9 +53,13 @@ const register = () => {
         email: user.email
       });
 
+
       // Reset form fields
       setEmail("");
       setPassword("");
+
+      Alert.alert("Registration Success");
+      router.push("/login");
     } catch (error: any) {
       console.error("Registration error:", error.message);
     }
