@@ -4,7 +4,7 @@ import {
   View,
   ScrollView,
   Image,
-  Pressable,
+  Pressable
 } from "react-native";
 import React from "react";
 import { Octicons } from "@expo/vector-icons";
@@ -12,8 +12,13 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const index = () => {
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("auth");
+    router.navigate("/login");
+  };
   return (
     <ScrollView>
       <View style={{ padding: 12, height: 200, backgroundColor: "#FEBE10" }}>
@@ -21,18 +26,20 @@ const index = () => {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: "space-between"
           }}
         >
           <View>
             <Image
               style={{ width: 200, height: 50, resizeMode: "cover" }}
               source={{
-                uri: "https://laundrymate.in/assets/images/shared/branding/Logo.webp",
+                uri: "https://laundrymate.in/assets/images/shared/branding/Logo.webp"
               }}
             />
           </View>
-          <Octicons name="three-bars" size={24} color="white" />
+          <Pressable onPress={handleLogout}>
+            <Octicons name="three-bars" size={24} color="white" />
+          </Pressable>
         </View>
 
         <View
@@ -40,7 +47,7 @@ const index = () => {
             marginTop: 20,
             flexDirection: "row",
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: "space-between"
           }}
         >
           <View>
@@ -51,7 +58,7 @@ const index = () => {
               style={{
                 marginTop: 2,
                 fontFamily: "Kailasa-Bold",
-                color: "white",
+                color: "white"
               }}
             >
               Home | Jhang - 35200
@@ -69,7 +76,7 @@ const index = () => {
                 width: 60,
                 fontSize: 12,
                 color: "#0066b2",
-                fontFamily: "KohinoorTelugu-Medium",
+                fontFamily: "KohinoorTelugu-Medium"
               }}
             >
               QUICK HELP
@@ -89,7 +96,7 @@ const index = () => {
           position: "absolute",
           top: 150,
           left: "50%",
-          transform: [{ translateX: -170 }],
+          transform: [{ translateX: -170 }]
         }}
       >
         <View style={{ flexDirection: "row", gap: 10 }}>
@@ -99,7 +106,7 @@ const index = () => {
               style={{
                 fontSize: 15,
                 color: "#0066b2",
-                fontFamily: "Kailasa-Bold",
+                fontFamily: "Kailasa-Bold"
               }}
             >
               QUICK ORDER
@@ -114,16 +121,18 @@ const index = () => {
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "space-between",
-                marginTop: 7,
+                marginTop: 7
               }}
             >
               <Pressable
-              onPress={()=>{router.push("/home/address")}}
+                onPress={() => {
+                  router.push("/home/address");
+                }}
                 style={{
                   backgroundColor: "#FEBE10",
                   paddingHorizontal: 10,
                   paddingVertical: 5,
-                  borderRadius: 4,
+                  borderRadius: 4
                 }}
               >
                 <Text style={{ fontSize: 13, fontWeight: "400" }}>
@@ -142,7 +151,7 @@ const index = () => {
           marginHorizontal: 5,
           flexDirection: "row",
           alignItems: "center",
-          gap: 10,
+          gap: 10
         }}
       >
         <View
@@ -166,7 +175,7 @@ const index = () => {
                   fontSize: 12,
                   fontWeight: "300",
                   width: 130,
-                  marginTop: 10,
+                  marginTop: 10
                 }}
               >
                 Put your laundry on Cruise Control
@@ -177,7 +186,7 @@ const index = () => {
                   fontSize: 12,
                   fontWeight: "300",
                   width: 130,
-                  marginTop: 3,
+                  marginTop: 3
                 }}
               >
                 Subscribe and get the benefits
@@ -193,7 +202,7 @@ const index = () => {
             paddingHorizontal: 12,
             paddingVertical: 10,
             borderRadius: 10,
-            marginRight: 20,
+            marginRight: 20
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -214,7 +223,7 @@ const index = () => {
                   fontSize: 12,
                   fontWeight: "300",
                   width: 130,
-                  marginTop: 10,
+                  marginTop: 10
                 }}
               >
                 select items from the catalogue below
@@ -224,7 +233,7 @@ const index = () => {
                   fontSize: 12,
                   fontWeight: "300",
                   width: 130,
-                  marginTop: 3,
+                  marginTop: 3
                 }}
               >
                 and book your order. It's about time
@@ -240,7 +249,7 @@ const index = () => {
           marginVertical: 10,
           flexDirection: "row",
           alignItems: "center",
-          gap: 10,
+          gap: 10
         }}
       >
         <View>
@@ -251,7 +260,7 @@ const index = () => {
               alignItems: "center",
               gap: 12,
               padding: 10,
-              borderRadius: 10,
+              borderRadius: 10
             }}
           >
             <View>
@@ -272,7 +281,7 @@ const index = () => {
               gap: 12,
               padding: 10,
               borderRadius: 10,
-              marginTop: 10,
+              marginTop: 10
             }}
           >
             <View>
@@ -295,7 +304,7 @@ const index = () => {
             flexDirection: "row",
             alignItems: "center",
             gap: 10,
-            flex:1
+            flex: 1
           }}
         >
           <View>
@@ -304,7 +313,7 @@ const index = () => {
                 fontSize: 20,
                 color: "#FEBE10",
                 width: 130,
-                fontWeight: "bold",
+                fontWeight: "bold"
               }}
             >
               WHAT'S THE PLAN
@@ -314,7 +323,7 @@ const index = () => {
                 fontSize: 20,
                 color: "#034694",
                 width: 100,
-                fontWeight: "bold",
+                fontWeight: "bold"
               }}
             >
               FOR THE PLANET
@@ -330,7 +339,7 @@ const index = () => {
           padding: 10,
           marginRight: "auto",
           marginLeft: "auto",
-          borderRadius: 7,
+          borderRadius: 7
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
@@ -343,7 +352,7 @@ const index = () => {
             fontWeight: "500",
             marginTop: 5,
             color: "#034694",
-            width: 150,
+            width: 150
           }}
         >
           Order Within 15 mins to catch this pickUp Slot
@@ -354,11 +363,11 @@ const index = () => {
             paddingHorizontal: 10,
             paddingVertical: 4,
             justifyContent: "center",
-            alignItems:"center",
-            borderWidth:0.7,
-            width:130,
-            marginTop:8,
-            borderRadius:5
+            alignItems: "center",
+            borderWidth: 0.7,
+            width: 130,
+            marginTop: 8,
+            borderRadius: 5
           }}
         >
           <Text>ADD ITEMS</Text>

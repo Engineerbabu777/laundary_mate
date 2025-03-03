@@ -4,16 +4,40 @@ import {
   View,
   ScrollView,
   TextInput,
-  Pressable
+  Pressable,
+  Alert
 } from "react-native";
 import React, { useState } from "react";
+import { addDoc, collection } from "firebase/firestore";
+import { auth, db } from "@/firebase";
 
 const add = () => {
   const [name, setName] = useState("");
   const [houseNo, setHouseNo] = useState("");
   const [landmark, setLandmark] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const addAddress = async () => {};
+  const userUid = auth?.currentUser.uid;
+  const addAddress = async () => {
+    try {
+      const addressCollectionRef = collection(
+        db,
+        "users",
+        userUid,
+        "userAddresses"
+      );
+
+      const addresssDocRef = await addDoc(addressCollectionRef, {
+        name: name,
+        houseNo: houseNo,
+        landmark: landmark,
+        postalCode: postalCode
+      });
+      Alert.alert("Address added successfully");
+      console.log("address added ", addresssDocRef.id);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
       <View style={{ padding: 10 }}>
@@ -22,7 +46,7 @@ const add = () => {
         </Text>
 
         <TextInput
-          placeholder="Bangalore"
+          placeholder="Taskim"
           placeholderTextColor={"black"}
           style={{
             padding: 10,
@@ -47,7 +71,7 @@ const add = () => {
               marginTop: 10,
               borderRadius: 5
             }}
-            placeholder="enter your name"
+            placeholder="Enter your name"
           />
         </View>
 
@@ -67,7 +91,7 @@ const add = () => {
               marginTop: 10,
               borderRadius: 5
             }}
-            placeholder=""
+            placeholder="06934 SİNCAN / ANKARA"
           />
         </View>
 
@@ -85,7 +109,7 @@ const add = () => {
               marginTop: 10,
               borderRadius: 5
             }}
-            placeholder="eg near apollo hospital"
+            placeholder="Near taskim village"
           />
         </View>
 

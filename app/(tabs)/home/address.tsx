@@ -32,7 +32,7 @@ const address = () => {
   const [selectedDate, setSelectedDate] = useState<any>(moment());
   const [selectedAdress, setSelectedAdress] = useState<any>("");
   console.log("addresses", addresses);
-  const userUid = auth?.currentUser.uid;
+  const userUid = auth?.currentUser?.uid;
   console.log("userId", userUid);
   const handleBack = () => {
     setStep((prevStep) => (prevStep > 1 ? prevStep - 1 : prevStep));
