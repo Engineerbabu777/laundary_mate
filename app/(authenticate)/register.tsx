@@ -7,7 +7,8 @@ import {
   Image,
   KeyboardAvoidingView,
   TextInput,
-  Alert
+  Alert,
+  ActivityIndicator
 } from "react-native";
 import React, { useState } from "react";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
@@ -23,6 +24,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const handleRegister = async () => {
     try {
@@ -30,6 +32,8 @@ const register = () => {
       if (!email || !password) {
         throw new Error("Email and password are required.");
       }
+
+      setLoading(true);
 
       // Create user account
       const userCredential = await createUserWithEmailAndPassword(
@@ -42,21 +46,16 @@ const register = () => {
       const user = userCredential.user;
       const userUid = user.uid;
 
-      // Send email verification
-      if (user) {
-      AsyncStorage.setItem("auth",userUid);
-        
-      }
-
       // Store user data in Firestore
       await setDoc(doc(db, "users", userUid), {
         email: user.email
       });
 
-
       // Reset form fields
       setEmail("");
       setPassword("");
+
+      setLoading(false);
 
       Alert.alert("Registration Success");
       router.push("/login");
@@ -202,16 +201,24 @@ const register = () => {
             padding: 15
           }}
         >
-          <Text
-            style={{
-              textAlign: "center",
-              fontSize: 16,
-              fontWeight: "bold",
-              color: "white"
-            }}
-          >
-            Register
-          </Text>
+          {loading ? (
+            <View style={{ display: "flex" , alignItems:"center",justifyContent:"center" }}>
+              <ActivityIndicator size={"small"} color={"white"} />
+            </View>
+          ) : (
+            <>
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  color: "white"
+                }}
+              >
+                Register
+              </Text>
+            </>
+          )}
         </Pressable>
 
         <Pressable
