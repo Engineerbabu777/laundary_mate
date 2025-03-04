@@ -16,8 +16,9 @@ const add = () => {
   const [houseNo, setHouseNo] = useState("");
   const [landmark, setLandmark] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const userUid = auth?.currentUser.uid;
+  const userUid = auth?.currentUser?.uid;
   const addAddress = async () => {
+    if(!userUid) {return;}
     try {
       const addressCollectionRef = collection(
         db,

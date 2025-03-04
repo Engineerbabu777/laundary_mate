@@ -7,7 +7,7 @@ import {
   Pressable
 } from "react-native";
 import React from "react";
-import { Octicons } from "@expo/vector-icons";
+import { AntDesign, Octicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
@@ -38,7 +38,7 @@ const index = () => {
             />
           </View>
           <Pressable onPress={handleLogout}>
-            <Octicons name="three-bars" size={24} color="white" />
+            <AntDesign name="logout" size={24} color="white" />
           </Pressable>
         </View>
 

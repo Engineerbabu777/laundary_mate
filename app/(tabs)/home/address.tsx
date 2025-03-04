@@ -5,7 +5,8 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Image
+  Image,
+  Alert
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +18,7 @@ import moment from "moment";
 import { useRouter } from "expo-router";
 import { addDoc, collection, getDoc, getDocs, query } from "firebase/firestore";
 import { auth, db } from "../../../firebase";
+import { cleanCart } from "@/redux/CartReducer";
 
 const address = () => {
   const router = useRouter();
@@ -46,6 +48,10 @@ const address = () => {
 
   useEffect(() => {
     const fetchAddress = async () => {
+      if (!userUid) {
+        return;
+      }
+
       try {
         const addressCollectionRef = collection(
           db,
@@ -57,12 +63,15 @@ const address = () => {
         const addressQuery = query(addressCollectionRef);
 
         const querySnapshot = await getDocs(addressQuery);
-        const addresses = [];
+        const addresses:any = [];
 
         querySnapshot.forEach((doc) => {
           addresses.push({ id: doc.id, ...doc.data() });
         });
         setAddresses(addresses);
+
+        console.log("addresses fetched successfully", addresses);
+
       } catch (error) {
         console.log("Error", error);
       }
@@ -87,6 +96,9 @@ const address = () => {
   };
   console.log(step);
   const placeOrder = async () => {
+    if (!userUid) {
+      return;
+    }
     dispatch(cleanCart());
 
     router.replace("/(tabs)/orders");
@@ -101,6 +113,8 @@ const address = () => {
     });
 
     console.log("order placed successfully!", orderDocRef.id);
+
+    Alert.alert("Order placed successfully")
   };
   const getNext6Days = () => {
     const nextDays = [];
