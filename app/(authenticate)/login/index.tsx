@@ -39,14 +39,16 @@ const login = () => {
     checkLoginStatus();
   }, []);
   const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
+    signInWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
       const user: User | any = userCredential.user;
       const token = user?.stsTokenManager?.accessToken;
 
-      AsyncStorage.setItem("auth", token);
+      await AsyncStorage.setItem("auth", token);
+      await AsyncStorage.setItem("user", JSON.stringify(user));
+    router.replace("/(tabs)/home");
+
     });
 
-    router.replace("/(tabs)/home");
   };
   return (
     <>

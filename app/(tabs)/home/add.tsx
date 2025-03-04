@@ -5,25 +5,35 @@ import {
   ScrollView,
   TextInput,
   Pressable,
-  Alert
+  Alert,
+  ActivityIndicator
 } from "react-native";
 import React, { useState } from "react";
 import { addDoc, collection } from "firebase/firestore";
-import { auth, db } from "@/firebase";
+import { db } from "@/firebase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { User } from "firebase/auth";
 
 const add = () => {
   const [name, setName] = useState("");
   const [houseNo, setHouseNo] = useState("");
   const [landmark, setLandmark] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const userUid = auth?.currentUser?.uid;
+  const [loading, setLoading] = useState(false);
+
   const addAddress = async () => {
-    if(!userUid) {return;}
+    const user: User | null | any = await AsyncStorage.getItem("user");
+    const parsedUser = JSON.parse(user);
+
+    if (!parsedUser?.uid) {
+      return;
+    }
     try {
+      setLoading(true);
       const addressCollectionRef = collection(
         db,
         "users",
-        userUid,
+        parsedUser?.uid,
         "userAddresses"
       );
 
@@ -33,6 +43,8 @@ const add = () => {
         landmark: landmark,
         postalCode: postalCode
       });
+      setLoading(false);
+
       Alert.alert("Address added successfully");
       console.log("address added ", addresssDocRef.id);
     } catch (error) {
@@ -143,7 +155,19 @@ const add = () => {
             marginTop: 20
           }}
         >
-          <Text>Add Address</Text>
+          {loading ? (
+            <View
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+              <ActivityIndicator size={"small"} color={"white"} />
+            </View>
+          ) : (
+            <Text>Add Address</Text>
+          )}
         </Pressable>
       </View>
     </ScrollView>

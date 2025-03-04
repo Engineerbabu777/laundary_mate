@@ -6,19 +6,27 @@ import {
   TouchableOpacity,
   View,
   Image,
-  Alert
+  Alert,
+  ActivityIndicator
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback
+} from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { addDoc, collection, getDoc, getDocs, query } from "firebase/firestore";
 import { auth, db } from "../../../firebase";
 import { cleanCart } from "@/redux/CartReducer";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { User } from "firebase/auth";
 
 const address = () => {
   const router = useRouter();
@@ -33,9 +41,9 @@ const address = () => {
   const [addresses, setAddresses] = useState<any>([]);
   const [selectedDate, setSelectedDate] = useState<any>(moment());
   const [selectedAdress, setSelectedAdress] = useState<any>("");
+  const [loading, setLoading] = useState(false);
   console.log("addresses", addresses);
-  const userUid = auth?.currentUser?.uid;
-  console.log("userId", userUid);
+
   const handleBack = () => {
     setStep((prevStep) => (prevStep > 1 ? prevStep - 1 : prevStep));
   };
@@ -46,39 +54,41 @@ const address = () => {
     { startTime: "7:30 PM", endTime: "10:00 PM" }
   ];
 
-  useEffect(() => {
-    const fetchAddress = async () => {
-      if (!userUid) {
-        return;
-      }
+  const fetchAddress = async () => {
+    const user: string | null = await AsyncStorage.getItem("user");
+    const parsedUser: User = JSON.parse(user!);
 
-      try {
-        const addressCollectionRef = collection(
-          db,
-          "users",
-          userUid,
-          "userAddresses"
-        );
+    try {
+      setLoading(true);
+      const addressCollectionRef = collection(
+        db,
+        "users",
+        parsedUser?.uid,
+        "userAddresses"
+      );
 
-        const addressQuery = query(addressCollectionRef);
+      const addressQuery = query(addressCollectionRef);
 
-        const querySnapshot = await getDocs(addressQuery);
-        const addresses:any = [];
+      const querySnapshot = await getDocs(addressQuery);
+      const addresses: any = [];
 
-        querySnapshot.forEach((doc) => {
-          addresses.push({ id: doc.id, ...doc.data() });
-        });
-        setAddresses(addresses);
+      querySnapshot.forEach((doc) => {
+        addresses.push({ id: doc.id, ...doc.data() });
+      });
+      setLoading(false);
+      setAddresses(addresses);
 
-        console.log("addresses fetched successfully", addresses);
+      console.log("addresses fetched successfully", addresses);
+    } catch (error) {
+      console.log("Error", error);
+    }
+  };
 
-      } catch (error) {
-        console.log("Error", error);
-      }
-    };
-
-    fetchAddress();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchAddress();
+    }, [])
+  );
 
   const handleNext = () => {
     setStep((prevStep) => {
@@ -96,14 +106,19 @@ const address = () => {
   };
   console.log(step);
   const placeOrder = async () => {
-    if (!userUid) {
-      return;
-    }
+    const user: string | null = await AsyncStorage.getItem("user");
+    const parsedUser: User = JSON.parse(user!);
+
     dispatch(cleanCart());
 
     router.replace("/(tabs)/orders");
 
-    const ordersCollectionRef = collection(db, "users", userUid, "orders");
+    const ordersCollectionRef = collection(
+      db,
+      "users",
+      parsedUser?.uid,
+      "orders"
+    );
 
     const orderDocRef = await addDoc(ordersCollectionRef, {
       items: { ...cart },
@@ -114,7 +129,7 @@ const address = () => {
 
     console.log("order placed successfully!", orderDocRef.id);
 
-    Alert.alert("Order placed successfully")
+    Alert.alert("Order placed successfully");
   };
   const getNext6Days = () => {
     const nextDays = [];
@@ -441,70 +456,87 @@ const address = () => {
                 </Pressable>
               </Pressable>
 
-              <View>
-                {/* map over the addresses */}
-                {addresses?.map((item, index) => (
-                  <Pressable
-                    onPress={() => setSelectedAdress(item)}
-                    key={index}
+              {loading ? (
+                <>
+                  <View
                     style={{
-                      backgroundColor: "white",
-                      padding: 10,
-                      marginVertical: 10,
-                      borderRadius: 15,
-                      borderWidth: selectedAdress === item ? 2 : 1,
-                      borderColor: "#0066b2"
+                      flex:1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center"
                     }}
                   >
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between"
-                      }}
-                    >
-                      <View
+                    <ActivityIndicator size={"large"} color={"#FEBE10"} />
+                  </View>
+                </>
+              ) : (
+                <>
+                  <View>
+                    {/* map over the addresses */}
+                    {addresses?.map((item, index) => (
+                      <Pressable
+                        onPress={() => setSelectedAdress(item)}
+                        key={index}
                         style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          gap: 10
+                          backgroundColor: "white",
+                          padding: 10,
+                          marginVertical: 10,
+                          borderRadius: 15,
+                          borderWidth: selectedAdress === item ? 2 : 1,
+                          borderColor: "#0066b2"
                         }}
                       >
-                        <Ionicons
-                          name="location-outline"
-                          size={24}
-                          color="#0066b2"
-                        />
-                        <Text style={{ fontSize: 17, fontWeight: "500" }}>
-                          Home
-                        </Text>
-                      </View>
-                      <FontAwesome name="flag" size={24} color="#0066b2" />
-                    </View>
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between"
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              gap: 10
+                            }}
+                          >
+                            <Ionicons
+                              name="location-outline"
+                              size={24}
+                              color="#0066b2"
+                            />
+                            <Text style={{ fontSize: 17, fontWeight: "500" }}>
+                              Home
+                            </Text>
+                          </View>
+                          <FontAwesome name="flag" size={24} color="#0066b2" />
+                        </View>
 
-                    <Text
-                      style={{
-                        marginTop: 10,
-                        fontSize: 15,
-                        fontWeight: "500",
-                        width: "95%"
-                      }}
-                    >
-                      {item?.houseNo} {item?.landmark}
-                    </Text>
-                    <Text
-                      style={{
-                        marginTop: 6,
-                        color: "gray",
-                        fontSize: 15,
-                        fontWeight: "500"
-                      }}
-                    >
-                      Bangalore {item?.postalCode}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
+                        <Text
+                          style={{
+                            marginTop: 10,
+                            fontSize: 15,
+                            fontWeight: "500",
+                            width: "95%"
+                          }}
+                        >
+                          {item?.houseNo} {item?.landmark}
+                        </Text>
+                        <Text
+                          style={{
+                            marginTop: 6,
+                            color: "gray",
+                            fontSize: 15,
+                            fontWeight: "500"
+                          }}
+                        >
+                          Bangalore {item?.postalCode}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </>
+              )}
             </View>
           )}
 
@@ -824,7 +856,7 @@ const address = () => {
         </ScrollView>
       </View>
 
-      {cart.length > 0 && (
+      {cart?.length > 0 && (
         <Pressable style={{ backgroundColor: "#E0E0E0", padding: 10 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             <View

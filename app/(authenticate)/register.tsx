@@ -43,8 +43,13 @@ const register = () => {
       );
       console.log("User credential:", userCredential);
 
-      const user = userCredential.user;
+      const user:any = userCredential.user;
       const userUid = user.uid;
+      const token = user?.stsTokenManager?.accessToken;
+
+      await AsyncStorage.setItem("auth", token);
+      AsyncStorage.setItem("user", JSON.stringify(user));
+
 
       // Store user data in Firestore
       await setDoc(doc(db, "users", userUid), {
@@ -58,7 +63,8 @@ const register = () => {
       setLoading(false);
 
       Alert.alert("Registration Success");
-      router.push("/login");
+      router.replace("/(tabs)/home");
+
     } catch (error: any) {
       console.error("Registration error:", error.message);
     }
