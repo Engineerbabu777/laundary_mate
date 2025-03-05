@@ -27,12 +27,15 @@ import { auth, db } from "../../../firebase";
 import { cleanCart } from "@/redux/CartReducer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { User } from "firebase/auth";
+import { useDispatch, useSelector } from "react-redux";
 
 const address = () => {
   const router = useRouter();
-  const dispatch: any = null;
-  const cart: any = [];
-  const total = 0;
+  const dispatch = useDispatch();
+  const cart = useSelector((state) => state.cart.cart);
+  const total = cart
+    ?.map((item) => item.item.price * item.item.quantity)
+    .reduce((prev, curr) => prev + curr, 0);
   const [step, setStep] = useState<any>(1);
   const [currentDate, setCurrentDate] = useState<any>(moment());
   const [deliveryDate, setDeliveryDate] = useState<any>(moment());
@@ -106,31 +109,54 @@ const address = () => {
   };
   console.log(step);
   const placeOrder = async () => {
-    const user: string | null = await AsyncStorage.getItem("user");
-    const parsedUser: User = JSON.parse(user!);
-
-    dispatch(cleanCart());
-
-    router.replace("/(tabs)/orders");
-
-    const ordersCollectionRef = collection(
-      db,
-      "users",
-      parsedUser?.uid,
-      "orders"
-    );
-
-    const orderDocRef = await addDoc(ordersCollectionRef, {
-      items: { ...cart },
-      address: selectedAdress,
-      pickuptime: `${selectedTime.startTime} - ${selectedTime.endTime}`,
-      deliveryTime: `${selectedDeliveryTime.startTime} - ${selectedDeliveryTime.endTime}`
-    });
-
-    console.log("order placed successfully!", orderDocRef.id);
-
-    Alert.alert("Order placed successfully");
+    try {
+      console.log("Placing order...");
+  
+      const user: string | null = await AsyncStorage.getItem("user");
+  
+      if (!user) {
+        console.error("No user found in AsyncStorage.");
+        Alert.alert("Error", "User not found. Please log in.");
+        return;
+      }
+  
+      const parsedUser: User = JSON.parse(user);
+      console.log("Parsed User:", parsedUser);
+  
+      if (!parsedUser?.uid) {
+        console.error("User UID is missing.");
+        Alert.alert("Error", "Invalid user data. Please try again.");
+        return;
+      }
+  
+      dispatch(cleanCart());
+      console.log("Cart cleaned.");
+  
+      router.replace("/(tabs)/orders");
+      console.log("Navigating to Orders page...");
+  
+      const ordersCollectionRef = collection(
+        db,
+        "users",
+        parsedUser.uid,
+        "orders"
+      );
+  
+      const orderDocRef = await addDoc(ordersCollectionRef, {
+        items: { ...cart },
+        address: selectedAdress,
+        pickuptime: `${selectedTime?.startTime} - ${selectedTime?.endTime}`,
+        deliveryTime: `${selectedDeliveryTime?.startTime} - ${selectedDeliveryTime?.endTime}`
+      });
+  
+      console.log("Order placed successfully! Order ID:", orderDocRef.id);
+      Alert.alert("Success", "Order placed successfully.");
+    } catch (error) {
+      console.error("Error placing order:", error);
+      Alert.alert("Error", "Failed to place order. Please try again.");
+    }
   };
+  
   const getNext6Days = () => {
     const nextDays = [];
     for (let i = 0; i < 5; i++) {
